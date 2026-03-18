@@ -2,4 +2,6 @@
 
 ## How to build d8
 
-![build v8 d8](https://disk.yandex.ru/i/pvOYS6Pa6MfYZA)
+video:
+1. download from github: [./build_v8_d8](./build_v8_d8)
+2. see on yandex disk: [https://disk.yandex.ru/i/pvOYS6Pa6MfYZA](https://disk.yandex.ru/i/pvOYS6Pa6MfYZA)
