@@ -48,3 +48,9 @@ echo "console.log('Hello world!');" > test.js
 
 - Юрий Карпов - Измеряем настоящую цену абстракций в JavaScript
   [https://youtu.be/UNHNgHWyCGc](https://youtu.be/UNHNgHWyCGc)
+- Внутреннее представление и оптимизации строк в JavaScript-движке V8: «отмываем» строки, «обгоняем» C++
+  https://habr.com/ru/companies/ruvds/articles/745008/
+- Read about torque
+  https://www.jfokus.se/jfokus20-preso/V8-Torque--A-Typed-Language-to-Implement-JavaScript.pdf
+- Alternative Installing V8 on a Mac doc
+  https://gist.github.com/kevincennis/0cd2138c78a07412ef21
