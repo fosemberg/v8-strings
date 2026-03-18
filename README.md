@@ -6,11 +6,12 @@
 
 1. install xcode
    https://apps.apple.com/us/app/xcode/id497799835
-2. find v8 repo
+2. install Xcode Command Line Tools
+3. find v8 repo
    https://github.com/v8/v8
-3. get `depot_tools`
+4. get `depot_tools`
    https://www.chromium.org/developers/how-tos/install-depot-tools/
-4. v8 debugger
+5. v8 debugger
    https://v8.dev/docs/d8
 
 ### full build sh
