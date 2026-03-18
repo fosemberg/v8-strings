@@ -1,5 +1,36 @@
 # v8 strings
 
+## `+=` vs `join`
+
+### `+=`
+
+```js
+str = '';
+for (let i = 0; i < 1_000; i++) {
+  str += i;
+}
+```
+### `join`
+
+```js
+str = '';
+arr = [];
+for (let i = 0; i < 1_000; i++) {
+	arr.push(i);
+	str = arr.join('');
+}
+```
+
+### JSBench.Me
+
+![](JSBench_Me.png)
+
+https://jsbench.me/wymmwc5lqz/1
+
+![](JSBench_Me_with_using.png)
+
+https://jsbench.me/vvmmwc6bts/1
+
 ## What to build
 
 V8 is an embeddable engine designed as a library. It can be integrated into any C++ application.
@@ -49,6 +80,32 @@ echo "console.log('Hello world!');" > test.js
 2. see on yandex disk: [https://disk.yandex.ru/i/pvOYS6Pa6MfYZA](https://disk.yandex.ru/i/pvOYS6Pa6MfYZA)
 
 ### DevTools Memory Snapshots
+
+#### `+=`
+
+```js
+function FooPlus() {
+  this.str = '';
+  for (let i = 0; i < 1_000; i++) {
+    this.str += i;
+  }
+}
+fooPlus = new FooPlus();
+```
+
+#### `join`
+
+```js
+function FooJoin() {
+  this.arr = [];
+  this.str = '';
+  for (let i = 0; i < 1_000; i++) {
+    this.arr.push(i);
+  }
+  this.str = this.arr.join('');
+}
+fooJoin = new FooJoin();
+```
 
 ![](./ConsOneTwoByteString.jpg)
 
