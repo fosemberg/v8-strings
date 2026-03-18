@@ -38,8 +38,8 @@ echo "console.log('Hello world!');" > test.js
 
 ### DevTools Memory Snapshots
 
-![[ConsOneTwoByteString.jpg]]
+![](./ConsOneTwoByteString.jpg)
 
-![[InternalizedString_Code.jpg]]
+![](./InternalizedString_Code.jpg)
 
-![[InternalizedString_Object.jpg]]
+![](./InternalizedString_Object.jpg)
