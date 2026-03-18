@@ -1,20 +1,31 @@
 # v8 strings
 
+## What to build
+
+V8 is an embeddable engine designed as a library. It can be integrated into any C++ application.
+**Primary consumers:**
+- **Chromium / Chrome** — the primary consumer
+- **Node.js** — server-side JavaScript
+- **d8** — a minimal debugging shell, shipped with V8
+
 ## How to build v8 on mac arm
 
-### links
+### Main steps
 
-1. install xcode
-   https://apps.apple.com/us/app/xcode/id497799835
-2. install Xcode Command Line Tools
-3. find v8 repo
+1. find v8 repo
    https://github.com/v8/v8
-4. get `depot_tools`
+2. get `depot_tools` (package of helper scripts)
    https://www.chromium.org/developers/how-tos/install-depot-tools/
-5. v8 debugger
+3. build d8 (v8 debugging shell)
    https://v8.dev/docs/d8
 
-### full build sh
+#### Set up the environment
+
+4. install xcode
+   https://apps.apple.com/us/app/xcode/id497799835
+5. install Xcode Command Line Tools
+
+### full build sh in 9 lines
 
 ```sh
 git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git --depth 1
