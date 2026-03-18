@@ -2,4 +2,4 @@
 
 ## How to build d8
 
-![](./build_v8_d8.mp4)
+![build v8 d8](https://disk.yandex.ru/i/pvOYS6Pa6MfYZA)
