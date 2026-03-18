@@ -43,3 +43,8 @@ echo "console.log('Hello world!');" > test.js
 ![](./InternalizedString_Code.jpg)
 
 ![](./InternalizedString_Object.jpg)
+
+## Related links
+
+- Юрий Карпов - Измеряем настоящую цену абстракций в JavaScript
+  [https://youtu.be/UNHNgHWyCGc](https://youtu.be/UNHNgHWyCGc)
