@@ -1,5 +1,8 @@
 # v8 strings
 
+QR Code to this page:
+![](v8_strings_qr_code.png)
+
 ## `+=` vs `join`
 
 ### `+=`
