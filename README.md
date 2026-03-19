@@ -4,9 +4,9 @@ QR Code to this page:
 
 ![](v8_strings_qr_code.png)
 
-## `+=` vs `join`
+## Speedtest `+=` vs `join`
 
-### `+=`
+### `+=` code
 
 ```js
 str = '';
@@ -14,7 +14,8 @@ for (let i = 0; i < 1_000; i++) {
   str += i;
 }
 ```
-### `join`
+
+### `join` code
 
 ```js
 str = '';
@@ -27,9 +28,13 @@ for (let i = 0; i < 1_000; i++) {
 
 ### JSBench.Me
 
+#### Generating stroke
+
 ![](JSBench_Me.png)
 
 https://jsbench.me/wymmwc5lqz/1
+
+#### Using stroke
 
 ![](JSBench_Me_with_using.png)
 
