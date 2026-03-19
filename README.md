@@ -196,7 +196,7 @@ test scripts: `test_js/join.js`, `test_js/ConsString.js`
 
 Entry point:
 
-`src/builtins/array-join.tq` — `ArrayPrototypeJoin`
+[`src/builtins/array-join.tq`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-42030b040dea1fc49191c1982c9a87a91a1dc9a5b8c20aaeac7e4c750583ef34R781) — `ArrayPrototypeJoin`
 ```diff
   transitioning javascript builtin ArrayPrototypeJoin(
       js-implicit context: NativeContext, receiver: JSAny)(...arguments): JSAny {
@@ -216,7 +216,7 @@ Entry point:
 
 Iterate over array elements, accumulate their string lengths into a `Buffer`.
 
-`src/builtins/array-join.tq` — `Buffer.Add`
+[`src/builtins/array-join.tq`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-42030b040dea1fc49191c1982c9a87a91a1dc9a5b8c20aaeac7e4c750583ef34R191) — `Buffer.Add`
 ```diff
   macro Add(
       implicit context: Context)(str: String, nofSeparators: intptr,
@@ -238,7 +238,7 @@ Iterate over array elements, accumulate their string lengths into a `Buffer`.
   }
 ```
 
-`src/builtins/array-join.tq` — `NewBuffer`
+[`src/builtins/array-join.tq`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-42030b040dea1fc49191c1982c9a87a91a1dc9a5b8c20aaeac7e4c750583ef34R313) — `NewBuffer`
 ```diff
   macro NewBuffer(len: uintptr, sep: String): Buffer {
     const cappedBufferSize: intptr =
@@ -262,7 +262,7 @@ Iterate over array elements, accumulate their string lengths into a `Buffer`.
 
 Allocate a single `SeqOneByteString` (or `SeqTwoByteString`) with the total length.
 
-`src/builtins/array-join.tq` — `BufferJoin`
+[`src/builtins/array-join.tq`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-42030b040dea1fc49191c1982c9a87a91a1dc9a5b8c20aaeac7e4c750583ef34R354) — `BufferJoin`
 ```diff
   macro BufferJoin(implicit context: Context)(buffer: Buffer,
                       sep: String): String {
@@ -304,7 +304,7 @@ Allocate a single `SeqOneByteString` (or `SeqTwoByteString`) with the total leng
 
 Copy all collected chunks into the pre-allocated sequential string.
 
-`src/objects/objects.cc` — `ArrayJoinConcatToSequentialString`
+[`src/objects/objects.cc`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-74dfba41a5031dfde1d477d7e4f8fb76791e1d7f8e15a2bb354366bda8ce89bcR4406) — `ArrayJoinConcatToSequentialString`
 ```diff
   Address JSArray::ArrayJoinConcatToSequentialString(
       Isolate* isolate, Address raw_chunk_list_head,
@@ -333,7 +333,7 @@ Copy all collected chunks into the pre-allocated sequential string.
   }
 ```
 
-`src/objects/objects.cc` — `WriteChunkListToFlat` (key parts)
+[`src/objects/objects.cc`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-74dfba41a5031dfde1d477d7e4f8fb76791e1d7f8e15a2bb354366bda8ce89bcR4268) — `WriteChunkListToFlat` (key parts)
 ```diff
 + uint32_t chunk_index = 0;
   while (true) {
