@@ -189,6 +189,7 @@ https://github.com/v8/v8/commit/c68f8492328eff48b8dcc04164431b7147706087
 
 ## tq
 
+commit:  
 https://v8.dev/docs/torque#how-torque-generates-code
 
 ## Related links
