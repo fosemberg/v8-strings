@@ -90,7 +90,22 @@ echo "console.log('Hello world!');" > test.js
 
 ## DevTools Memory Snapshots
 
-#### `+=`
+### Try code asis
+
+```js
+str = '';
+for (let i = 0; i < 1_000; i++) {
+  str += i;
+}
+```
+
+![](Memory_Snapshots_try_asis.png)
+
+#### Try 2 snapshots
+
+![](Memory_Snapshots_try_2_snapshots.png)
+
+#### With classes
 
 ```js
 function FooPlus() {
@@ -100,11 +115,7 @@ function FooPlus() {
   }
 }
 fooPlus = new FooPlus();
-```
 
-#### `join`
-
-```js
 function FooJoin() {
   this.arr = [];
   this.str = '';
@@ -116,11 +127,67 @@ function FooJoin() {
 fooJoin = new FooJoin();
 ```
 
+![](Memory_Snapshots_with_classes.png)
+
+#### Using strings
+
+```js
+function FooPlus() {
+  this.str = '';
+  for (let i = 0; i < 1_000; i++) {
+    this.str += i;
+  }
+}
+fooPlus = new FooPlus();
+fooPlus.str[0];          // <---
+
+function FooJoin() {
+  this.arr = [];
+  this.str = '';
+  for (let i = 0; i < 1_000; i++) {
+    this.arr.push(i);
+  }
+  this.str = this.arr.join('');
+}
+fooJoin = new FooJoin();
+fooJoin.str[0];          // <---
+```
+
+![](Memory_Snapshots_Using_strings.png)
+
+#### 20 elements
+
+```js
+function FooPlus() {
+  this.str = ''; //   \/
+  for (let i = 0; i < 20; i++) { // <---
+    this.str += i; // /\
+  }
+}
+fooPlus = new FooPlus();
+```
+
+![](Memory_Snapshots_20_elements.png)
+
+#### 11 elements
+
+```js
+function FooPlus() {
+  this.str = ''; //   \/
+  for (let i = 0; i < 11; i++) { // <---
+    this.str += i; // /\
+  }
+}
+fooPlus = new FooPlus();
+```
+
+![](Memory_Snapshots_11_elements.png)
+
+#### more interesting things
+
 ![](./ConsOneTwoByteString.jpg)
 
 ![](./InternalizedString_Code.jpg)
-
-![](./InternalizedString_Object.jpg)
 
 ## Debug sources
 
