@@ -191,7 +191,7 @@ https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131
 
 test scripts: `test_js/join.js`, `test_js/ConsString.js`
 
-### Join: 3 phases how it's working
+### Join. How it's working
 
 `arr.join('')` works in 3 phases:
 
@@ -457,7 +457,7 @@ str[0];
 1234567891011121314151617181920
 ```
 
-### ConsString (`+=`): 3 phases how it's working
+### ConsString (`+=`). How it's working
 
 `str += i` works in 3 phases:
 
