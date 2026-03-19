@@ -85,8 +85,9 @@ echo "console.log('Hello world!');" > test.js
 
 ### video
 
-1. download from github: [build_v8_d8.mp4](build_v8_d8.mp4)
-2. see on yandex disk: [https://disk.yandex.ru/i/pvOYS6Pa6MfYZA](https://disk.yandex.ru/i/pvOYS6Pa6MfYZA)
+1. see on YouTube: [https://youtu.be/cxtgi7Ti330](https://youtu.be/cxtgi7Ti330)
+2. download from github: [build_v8_d8.mp4](build_v8_d8.mp4)
+3. see on yandex disk: [https://disk.yandex.ru/i/pvOYS6Pa6MfYZA](https://disk.yandex.ru/i/pvOYS6Pa6MfYZA)
 
 ## DevTools Memory Snapshots
 
