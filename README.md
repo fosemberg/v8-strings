@@ -117,6 +117,10 @@ fooJoin = new FooJoin();
 
 https://github.com/v8/v8/commit/c68f8492328eff48b8dcc04164431b7147706087
 
+### tq
+
+https://v8.dev/docs/torque
+
 ## Related links
 
 - Юрий Карпов - Измеряем настоящую цену абстракций в JavaScript
