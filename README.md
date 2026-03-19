@@ -2,7 +2,7 @@
 
 QR Code to this page:
 
-![](v8_strings_qr_code.png)
+![](images/v8_strings_qr_code.png)
 
 ## Speedtest `+=` vs `join`
 
@@ -30,13 +30,13 @@ for (let i = 0; i < 1_000; i++) {
 
 #### Generating stroke
 
-![](JSBench_Me.png)
+![](images/JSBench_Me.png)
 
 https://jsbench.me/wymmwc5lqz/1
 
 #### Using stroke
 
-![](JSBench_Me_with_using.png)
+![](images/JSBench_Me_with_using.png)
 
 https://jsbench.me/vvmmwc6bts/1
 
@@ -85,7 +85,7 @@ echo "console.log('Hello world!');" > test.js
 
 ### video
 
-1. download from github: [./build_v8_d8.mp4](./build_v8_d8.mp4)
+1. download from github: [build_v8_d8.mp4](build_v8_d8.mp4)
 2. see on yandex disk: [https://disk.yandex.ru/i/pvOYS6Pa6MfYZA](https://disk.yandex.ru/i/pvOYS6Pa6MfYZA)
 
 ## DevTools Memory Snapshots
@@ -99,11 +99,11 @@ for (let i = 0; i < 1_000; i++) {
 }
 ```
 
-![](Memory_Snapshots_try_asis.png)
+![](images/Memory_Snapshots_try_asis.png)
 
 ### Try 2 snapshots
 
-![](Memory_Snapshots_try_2_snapshots.png)
+![](images/Memory_Snapshots_try_2_snapshots.png)
 
 ### With classes
 
@@ -127,7 +127,7 @@ function FooJoin() {
 fooJoin = new FooJoin();
 ```
 
-![](Memory_Snapshots_with_classes.png)
+![](images/Memory_Snapshots_with_classes.png)
 
 ### Using strings
 
@@ -153,7 +153,7 @@ fooJoin = new FooJoin();
 fooJoin.str[0];          // <---
 ```
 
-![](Memory_Snapshots_Using_strings.png)
+![](images/Memory_Snapshots_Using_strings.png)
 
 ### 20 elements
 
@@ -167,7 +167,7 @@ function FooPlus() {
 fooPlus = new FooPlus();
 ```
 
-![](Memory_Snapshots_20_elements.png)
+![](images/Memory_Snapshots_20_elements.png)
 
 ### 11 elements
 
@@ -181,7 +181,7 @@ function FooPlus() {
 fooPlus = new FooPlus();
 ```
 
-![](Memory_Snapshots_11_elements.png)
+![](images/Memory_Snapshots_11_elements.png)
 
 ## Debug sources
 
