@@ -358,6 +358,72 @@ Copy all collected chunks into the pre-allocated sequential string.
   }
 ```
 
+#### Example
+
+`cat test_js/join.js`
+```js
+const arr = [];
+for (let i = 1; i <= 20; i++) {
+  arr.push(i);
+}
+const str = arr.join('');
+
+str[0];
+```
+
+`./out/foo/d8 test_js/join.js`
+```
+=== Array.prototype.join ===
+[Phase 1: Collect] NewBuffer capacity: 21
+[Phase 1: Collect] Buffer.Add element length: 1
+[Phase 1: Collect] Buffer.Add element length: 1
+[Phase 1: Collect] Buffer.Add element length: 1
+[Phase 1: Collect] Buffer.Add element length: 1
+[Phase 1: Collect] Buffer.Add element length: 1
+[Phase 1: Collect] Buffer.Add element length: 1
+[Phase 1: Collect] Buffer.Add element length: 1
+[Phase 1: Collect] Buffer.Add element length: 1
+[Phase 1: Collect] Buffer.Add element length: 1
+[Phase 1: Collect] Buffer.Add element length: 2
+[Phase 1: Collect] Buffer.Add element length: 2
+[Phase 1: Collect] Buffer.Add element length: 2
+[Phase 1: Collect] Buffer.Add element length: 2
+[Phase 1: Collect] Buffer.Add element length: 2
+[Phase 1: Collect] Buffer.Add element length: 2
+[Phase 1: Collect] Buffer.Add element length: 2
+[Phase 1: Collect] Buffer.Add element length: 2
+[Phase 1: Collect] Buffer.Add element length: 2
+[Phase 1: Collect] Buffer.Add element length: 2
+[Phase 1: Collect] Buffer.Add element length: 2
+
+[Phase 2: Allocate] SeqString total length: 31
+
+[Phase 3: Copy] dest_length=31, encoding=OneByte
+[Phase 3: Copy] processing chunk #0, 20 elements
+[Phase 3: Copy]   WriteToFlat: 1 bytes
+[Phase 3: Copy]   WriteToFlat: 1 bytes
+[Phase 3: Copy]   WriteToFlat: 1 bytes
+[Phase 3: Copy]   WriteToFlat: 1 bytes
+[Phase 3: Copy]   WriteToFlat: 1 bytes
+[Phase 3: Copy]   WriteToFlat: 1 bytes
+[Phase 3: Copy]   WriteToFlat: 1 bytes
+[Phase 3: Copy]   WriteToFlat: 1 bytes
+[Phase 3: Copy]   WriteToFlat: 1 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy]   WriteToFlat: 2 bytes
+[Phase 3: Copy] result:
+1234567891011121314151617181920
+```
+
 ### ConsString (`+=`): 3 phases how it's working
 
 `str += i` works in 3 phases:
@@ -521,6 +587,85 @@ When the string is actually accessed (e.g. `str[0]`), the ConsString tree gets f
     }
     return result;
   }
+```
+
+### Example
+
+`cat test_js/ConsString.js`
+```js
+let str = '';
+for (let i = 1; i <= 20; i++) {
+  str += i;
+}
+
+str[0]
+```
+
+`./out/foo/d8 test_js/ConsString.js`
+```
+[Phase 1: StringAdd] left_len: 0
+[Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] left_len: 1
+[Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] left_len: 2
+[Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] left_len: 3
+[Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] left_len: 4
+[Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] left_len: 5
+[Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] left_len: 6
+[Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] left_len: 7
+[Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] left_len: 8
+[Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] left_len: 9
+[Phase 1: StringAdd] right_len: 2
+[Phase 1: StringAdd] left_len: 11
+[Phase 1: StringAdd] right_len: 2
+[Phase 2: AllocateConsString] left_len: 11
+[Phase 2: AllocateConsString] right_len: 2
+[Phase 1: StringAdd] left_len: 13
+[Phase 1: StringAdd] right_len: 2
+[Phase 2: AllocateConsString] left_len: 13
+[Phase 2: AllocateConsString] right_len: 2
+[Phase 1: StringAdd] left_len: 15
+[Phase 1: StringAdd] right_len: 2
+[Phase 2: AllocateConsString] left_len: 15
+[Phase 2: AllocateConsString] right_len: 2
+[Phase 1: StringAdd] left_len: 17
+[Phase 1: StringAdd] right_len: 2
+[Phase 2: AllocateConsString] left_len: 17
+[Phase 2: AllocateConsString] right_len: 2
+[Phase 1: StringAdd] left_len: 19
+[Phase 1: StringAdd] right_len: 2
+[Phase 2: AllocateConsString] left_len: 19
+[Phase 2: AllocateConsString] right_len: 2
+[Phase 1: StringAdd] left_len: 21
+[Phase 1: StringAdd] right_len: 2
+[Phase 2: AllocateConsString] left_len: 21
+[Phase 2: AllocateConsString] right_len: 2
+[Phase 1: StringAdd] left_len: 23
+[Phase 1: StringAdd] right_len: 2
+[Phase 2: AllocateConsString] left_len: 23
+[Phase 2: AllocateConsString] right_len: 2
+[Phase 1: StringAdd] left_len: 25
+[Phase 1: StringAdd] right_len: 2
+[Phase 2: AllocateConsString] left_len: 25
+[Phase 2: AllocateConsString] right_len: 2
+[Phase 1: StringAdd] left_len: 27
+[Phase 1: StringAdd] right_len: 2
+[Phase 2: AllocateConsString] left_len: 27
+[Phase 2: AllocateConsString] right_len: 2
+[Phase 1: StringAdd] left_len: 29
+[Phase 1: StringAdd] right_len: 2
+[Phase 2: AllocateConsString] left_len: 29
+[Phase 2: AllocateConsString] right_len: 2
+
+[Phase 3: Flatten] ConsString total_length=31
+[Phase 3: Flatten] allocating OneByte SeqString, length=31
 ```
 
 ## tq
