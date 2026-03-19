@@ -366,7 +366,7 @@ Copy all collected chunks into the pre-allocated sequential string.
 
 Each `+=` calls `StringAdd` — receives left and right strings.
 
-`src/builtins/builtins-string-gen.cc` — `StringAdd`
+[`src/builtins/builtins-string-gen.cc`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-aca0a2a68a502b9fd46b845ee5a3a3944596663cc01db84d97b53d7afd2ff1bbR489) — `StringAdd`
 ```diff
   TNode<String> StringBuiltinsAssembler::StringAdd(
       TNode<ContextOrEmptyContext> context, TNode<String> left,
@@ -415,7 +415,7 @@ Each `+=` calls `StringAdd` — receives left and right strings.
   }
 ```
 
-`src/objects/string.h`
+[`src/objects/string.h`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-09027ad9b0e8ef86b64321b2d54987fbd207dac4092998643df0768b7dc51afcR1053)
 ```cpp
   // Minimum length for a cons string. <---
   static const uint32_t kMinLength = 13;
@@ -425,7 +425,7 @@ Each `+=` calls `StringAdd` — receives left and right strings.
 
 If combined length >= `kMinLength` (13), allocate a `ConsString` node that points to left and right instead of copying.
 
-`src/builtins/builtins-string-gen.cc` — `AllocateConsString`
+[`src/builtins/builtins-string-gen.cc`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-aca0a2a68a502b9fd46b845ee5a3a3944596663cc01db84d97b53d7afd2ff1bbR440) — `AllocateConsString`
 ```diff
   TNode<String> StringBuiltinsAssembler::AllocateConsString(
       TNode<Uint32T> length, TNode<String> left, TNode<String> right) {
@@ -461,7 +461,7 @@ If combined length >= `kMinLength` (13), allocate a `ConsString` node that point
 
 When the string is actually accessed (e.g. `str[0]`), the ConsString tree gets flattened into a single `SeqString`.
 
-`src/objects/string-inl.h` — `String::Flatten`
+[`src/objects/string-inl.h`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-a2c4e9689308c68bb92724fd563c1a9f2f992d48b81fa2a15c3f8f4b28be44d9R960) — `String::Flatten`
 ```diff
   HandleType<String> String::Flatten(Isolate* isolate, HandleType<T> string,
                                      AllocationType allocation) {
@@ -491,7 +491,7 @@ When the string is actually accessed (e.g. `str[0]`), the ConsString tree gets f
   }
 ```
 
-`src/objects/string-inl.h` — `String::SlowFlatten`
+[`src/objects/string-inl.h`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-a2c4e9689308c68bb92724fd563c1a9f2f992d48b81fa2a15c3f8f4b28be44d9R891) — `String::SlowFlatten`
 ```diff
   HandleType<String> String::SlowFlatten(
       Isolate* isolate, HandleType<ConsString> cons, AllocationType allocation) {
