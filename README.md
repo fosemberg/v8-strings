@@ -188,9 +188,81 @@ fooPlus = new FooPlus();
 commit:  
 https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131
 
-### BufferJoin
+test scripts: `test_js/join.js`, `test_js/ConsString.js`
 
-`src/builtins/array-join.tq`
+### Join: 3 phases how it's working
+
+`arr.join('')` works in 3 phases:
+
+Entry point:
+
+`src/builtins/array-join.tq` — `ArrayPrototypeJoin`
+```diff
+  transitioning javascript builtin ArrayPrototypeJoin(
+      js-implicit context: NativeContext, receiver: JSAny)(...arguments): JSAny {
++   Print("=== Array.prototype.join ===");
+    const sepObj: JSAny = arguments[0];
+
+    // 1. Let O be ? ToObject(this value).
+    const o: JSReceiver = ToObject_Inline(context, receiver);
+
+    // 2. Let len be ? ToLength(? Get(O, "length")).
+    const len: Number = GetLengthProperty(o);
+    ...
+  }
+```
+
+#### Phase 1: Collect
+
+Iterate over array elements, accumulate their string lengths into a `Buffer`.
+
+`src/builtins/array-join.tq` — `Buffer.Add`
+```diff
+  macro Add(
+      implicit context: Context)(str: String, nofSeparators: intptr,
+      separatorLength: intptr): void {
+    dcheck(this.index != 1 || this.head == this.chunk);
+    const writeSeparators: bool = this.index == 1 | nofSeparators > 1;
+    this.AddSeparators(nofSeparators, separatorLength, writeSeparators);
+
+    this.totalStringLength =
+        AddStringLength(this.totalStringLength, str.length_intptr);
++   Print("[Phase 1: Collect] Buffer.Add element length", Convert<uintptr>(str.length_intptr));
+    if (TaggedEqual(str, this.lastString)) {
+      this.RepeatLast();
+    } else {
+      this.AppendToChunk(str);
+      this.lastString = str;
+    }
+    this.isOneByte = IsOneByteStringMap(str.map) & this.isOneByte;
+  }
+```
+
+`src/builtins/array-join.tq` — `NewBuffer`
+```diff
+  macro NewBuffer(len: uintptr, sep: String): Buffer {
+    const cappedBufferSize: intptr =
+        len >= kMaxBufferChunkSize ? kMaxBufferChunkSize : Signed(len + 1);
+    dcheck(cappedBufferSize > 0);
+    const chunk = AllocateZeroedFixedArray(cappedBufferSize);
++   Print("[Phase 1: Collect] NewBuffer capacity", Convert<uintptr>(cappedBufferSize));
+    chunk.objects[0] = Undefined;
+    return Buffer{
+      head: chunk,
+      chunk: chunk,
+      index: 1,
+      totalStringLength: 0,
+      isOneByte: IsOneByteStringMap(sep.map),
+      lastString: Null
+    };
+  }
+```
+
+#### Phase 2 + 3: Allocate + Copy
+
+Allocate a single `SeqOneByteString` (or `SeqTwoByteString`) with the total length.
+
+`src/builtins/array-join.tq` — `BufferJoin`
 ```diff
   macro BufferJoin(implicit context: Context)(buffer: Buffer,
                       sep: String): String {
@@ -201,14 +273,9 @@ https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131
     if (buffer.index == 2 && buffer.head == buffer.chunk) {
       const chunk: FixedArray = buffer.head;
       typeswitch (chunk.objects[1]) {
-        // When the element is a string, just return it and completely avoid
-        // allocating another string.
         case (str: String): {
           return str;
         }
-
-        // When the element is a smi, use StringRepeat to quickly build a memory
-        // efficient separator repeated string.
         case (nofSeparators: Smi): {
           dcheck(nofSeparators > 0);
           return StringRepeat(context, sep, nofSeparators);
@@ -220,38 +287,239 @@ https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131
     }
 
     const length: uint32 = Convert<uint32>(Unsigned(buffer.totalStringLength));
-+   Print('BufferJoin length', Convert<uintptr>(length));
++   Print("[Phase 2: Allocate] SeqString total length", Convert<uintptr>(length));
     const r: String = buffer.isOneByte ? AllocateSeqOneByteString(length) :
                                          AllocateSeqTwoByteString(length);
 -   return CallJSArrayArrayJoinConcatToSequentialString(
 +   const result: String = CallJSArrayArrayJoinConcatToSequentialString(
         buffer.head, buffer.index, sep, r);
-    
-+   Print('result:');
+
++   Print("[Phase 3: Copy] result:");
 +   PrintStringSimple(result);
 +   return result;
   }
 ```
 
-![](src_BufferJoin.png)
+#### Phase 3: Copy
 
-![](src_BufferJoin_2.png)
+Copy all collected chunks into the pre-allocated sequential string.
 
-`src/builtins/array-join.tq`
+`src/objects/objects.cc` — `ArrayJoinConcatToSequentialString`
 ```diff
-  // Calculates the running total length of the resulting string.  If the
-  // calculated length exceeds the maximum string length (see
-  // String::kMaxLength), throws a range error.
-  macro AddStringLength(
-      implicit context: Context)(lenA: intptr, lenB: intptr): intptr {
-    try {
-      const length: intptr = TryIntPtrAdd(lenA, lenB) otherwise IfOverflow;
-      if (length > kStringMaxLength) goto IfOverflow;
-+     Print("AddStringLength Length", Convert<uintptr>(length));
-      return length;
-    } label IfOverflow deferred {
-      ThrowInvalidStringLength(context);
+  Address JSArray::ArrayJoinConcatToSequentialString(
+      Isolate* isolate, Address raw_chunk_list_head,
+      uintptr_t raw_last_chunk_length, Address raw_separator, Address raw_dest) {
+    DisallowGarbageCollection no_gc;
+    DisallowJavascriptExecution no_js(isolate);
+    Tagged<FixedArray> chunk_list_head =
+        Cast<FixedArray>(Tagged<Object>(raw_chunk_list_head));
+    Tagged<String> separator = Cast<String>(Tagged<Object>(raw_separator));
+    Tagged<String> dest = Cast<String>(Tagged<Object>(raw_dest));
+
+    uint32_t last_chunk_length = static_cast<uint32_t>(raw_last_chunk_length);
++   PrintF("\n[Phase 3: Copy] dest_length=%d, encoding=%s\n",
++          dest->length(),
++          StringShape(dest).IsSequentialOneByte() ? "OneByte" : "TwoByte");
+    if (StringShape(dest).IsSequentialOneByte()) {
+      WriteChunkListToFlat(chunk_list_head, last_chunk_length, separator,
+                           Cast<SeqOneByteString>(dest)->GetChars(no_gc),
+                           dest->length());
+    } else {
+      WriteChunkListToFlat(chunk_list_head, last_chunk_length, separator,
+                           Cast<SeqTwoByteString>(dest)->GetChars(no_gc),
+                           dest->length());
     }
+    return dest.ptr();
+  }
+```
+
+`src/objects/objects.cc` — `WriteChunkListToFlat` (key parts)
+```diff
++ uint32_t chunk_index = 0;
+  while (true) {
+    Tagged<Object> maybe_next_chunk = chunk->get(0);
+    bool is_last_chunk = IsUndefined(maybe_next_chunk);
+    uint32_t chunk_len = chunk->ulength().value();
+    uint32_t length = is_last_chunk ? last_chunk_length : chunk_len;
++   PrintF("[Phase 3: Copy] processing chunk #%u, %u elements\n",
++          chunk_index++, length - 1);
+    ...
+      if (V8_LIKELY(!element_is_special)) {
+        Tagged<String> string = Cast<String>(element);
+        const uint32_t string_length = string->length();
++       PrintF("[Phase 3: Copy]   WriteToFlat: %u bytes\n",
++              string_length);
+
+        String::WriteToFlat(string, sink, 0, string_length);
+        sink += string_length;
+        num_separators = 1;
+      }
+    ...
+  }
+```
+
+### ConsString (`+=`): 3 phases how it's working
+
+`str += i` works in 3 phases:
+
+#### Phase 1: StringAdd
+
+Each `+=` calls `StringAdd` — receives left and right strings.
+
+`src/builtins/builtins-string-gen.cc` — `StringAdd`
+```diff
+  TNode<String> StringBuiltinsAssembler::StringAdd(
+      TNode<ContextOrEmptyContext> context, TNode<String> left,
+      TNode<String> right) {
++   Print("[Phase 1: StringAdd] left_len", LoadStringLengthAsWord32(left));
++   Print("[Phase 1: StringAdd] right_len", LoadStringLengthAsWord32(right));
+
+    TVARIABLE(String, result);
+    Label check_right(this), runtime(this, Label::kDeferred), cons(this),
+        done(this, &result);
+
+    TNode<Uint32T> left_length = LoadStringLengthAsWord32(left);
+    GotoIfNot(Word32Equal(left_length, Uint32Constant(0)), &check_right);
+    result = right;
+    Goto(&done);
+
+    BIND(&check_right);
+    TNode<Uint32T> right_length = LoadStringLengthAsWord32(right);
+    GotoIfNot(Word32Equal(right_length, Uint32Constant(0)), &cons);
+    result = left;
+    Goto(&done);
+
+    BIND(&cons);
+    {
+      TNode<Uint32T> new_length = Uint32Add(left_length, right_length);
+      GotoIf(Uint32GreaterThan(new_length, Uint32Constant(String::kMaxLength)),
+             &runtime);
+
+      TVARIABLE(String, var_left, left);
+      TVARIABLE(String, var_right, right);
+      Label non_cons(this, {&var_left, &var_right});
+      GotoIf(Uint32LessThan(new_length, Uint32Constant(ConsString::kMinLength)),
+             &non_cons);
+
+      result =
+          AllocateConsString(new_length, var_left.value(), var_right.value());
+      Goto(&done);
+
+      BIND(&non_cons);
+      Comment("Full string concatenate");
+      // ... copies left+right into a new SeqString (short strings path)
+    }
+
+    BIND(&done);
+    return result.value();
+  }
+```
+
+`src/objects/string.h`
+```cpp
+  // Minimum length for a cons string. <---
+  static const uint32_t kMinLength = 13;
+```
+
+#### Phase 2: AllocateConsString
+
+If combined length >= `kMinLength` (13), allocate a `ConsString` node that points to left and right instead of copying.
+
+`src/builtins/builtins-string-gen.cc` — `AllocateConsString`
+```diff
+  TNode<String> StringBuiltinsAssembler::AllocateConsString(
+      TNode<Uint32T> length, TNode<String> left, TNode<String> right) {
++   Print("[Phase 2: AllocateConsString] left_len", LoadStringLengthAsWord32(left));
++   Print("[Phase 2: AllocateConsString] right_len", LoadStringLengthAsWord32(right));
+    Comment("Allocating ConsString");
+    TVARIABLE(String, first, left);
+    TNode<Int32T> left_instance_type = LoadInstanceType(left);
+    // Unwrap ThinStrings
+    GotoIfNot(IsSetWord32(left_instance_type, kThinStringTagBit), &handle_right);
+    first = LoadObjectField<String>(left, offsetof(ThinString, actual_));
+    ...
+    TVARIABLE(String, second, right);
+    // Unwrap ThinStrings for right
+    ...
+    // Determine ConsString map (OneByte or TwoByte)
+    TNode<Int32T> combined_instance_type =
+        Word32And(left_instance_type, right_instance_type);
+    TNode<Map> result_map = CAST(Select<Object>(
+        IsSetWord32(combined_instance_type, kStringEncodingMask),
+        [=, this] { return ConsOneByteStringMapConstant(); },
+        [=, this] { return ConsTwoByteStringMapConstant(); }));
+    TNode<HeapObject> result = AllocateInNewSpace(sizeof(ConsString));
+    StoreMapNoWriteBarrier(result, result_map);
+    StoreObjectFieldNoWriteBarrier(result, offsetof(ConsString, length_), length);
+    StoreObjectFieldNoWriteBarrier(result, offsetof(ConsString, first_), first.value());
+    StoreObjectFieldNoWriteBarrier(result, offsetof(ConsString, second_), second.value());
+    return CAST(result);
+  }
+```
+
+#### Phase 3: Flatten
+
+When the string is actually accessed (e.g. `str[0]`), the ConsString tree gets flattened into a single `SeqString`.
+
+`src/objects/string-inl.h` — `String::Flatten`
+```diff
+  HandleType<String> String::Flatten(Isolate* isolate, HandleType<T> string,
+                                     AllocationType allocation) {
+    DisallowGarbageCollection no_gc;
+    Tagged<String> s = *string;
+    StringShape shape(s);
+
+    if (V8_LIKELY(shape.IsDirect())) return string;
+
+    if (shape.IsCons()) {
+      Tagged<ConsString> cons = Cast<ConsString>(s);
++     PrintF("\n[Phase 3: Flatten] ConsString total_length=%d\n", s->length());
+      if (!cons->IsFlat()) {
+        AllowGarbageCollection yes_gc;
+        HandleType<String> result =
+            SlowFlatten(isolate, Cast<ConsString>(string), allocation);
+        return result;
+      }
+      s = cons->first();
+      shape = StringShape(s);
+    }
+
+    if (shape.IsThin()) {
+      s = Cast<ThinString>(s)->actual();
+    }
+    return HandleType<String>(s, isolate);
+  }
+```
+
+`src/objects/string-inl.h` — `String::SlowFlatten`
+```diff
+  HandleType<String> String::SlowFlatten(
+      Isolate* isolate, HandleType<ConsString> cons, AllocationType allocation) {
+    // ... handle empty first part, determine allocation type ...
+
+    uint32_t length = raw_cons->length();
+    bool is_one_byte_representation = cons->IsOneByteRepresentation();
+
++   PrintF("[Phase 3: Flatten] allocating %s SeqString, length=%u\n",
++          is_one_byte_representation ? "OneByte" : "TwoByte", length);
+
+    HandleType<SeqString> result;
+    if (is_one_byte_representation) {
+      HandleType<SeqOneByteString> flat =
+          isolate->factory()->NewRawOneByteString(length, allocation).ToHandleChecked();
+      WriteToFlat2(flat->GetChars(no_gc), raw_cons, 0, length, ...);
+      raw_cons->set_first(*flat);
+      raw_cons->set_second(ReadOnlyRoots(isolate).empty_string());
+      result = flat;
+    } else {
+      HandleType<SeqTwoByteString> flat =
+          isolate->factory()->NewRawTwoByteString(length, allocation).ToHandleChecked();
+      WriteToFlat2(flat->GetChars(no_gc), raw_cons, 0, length, ...);
+      raw_cons->set_first(*flat);
+      raw_cons->set_second(ReadOnlyRoots(isolate).empty_string());
+      result = flat;
+    }
+    return result;
   }
 ```
 
