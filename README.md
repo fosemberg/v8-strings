@@ -188,6 +188,73 @@ fooPlus = new FooPlus();
 commit:  
 https://github.com/v8/v8/commit/c68f8492328eff48b8dcc04164431b7147706087
 
+### BufferJoin
+
+`src/builtins/array-join.tq`
+```diff
+  macro BufferJoin(implicit context: Context)(buffer: Buffer,
+                      sep: String): String {
+    dcheck(IsValidPositiveSmi(buffer.totalStringLength));
+    if (buffer.totalStringLength == 0) return kEmptyString;
+
+    // Fast path when there's only one chunk and one buffer element.
+    if (buffer.index == 2 && buffer.head == buffer.chunk) {
+      const chunk: FixedArray = buffer.head;
+      typeswitch (chunk.objects[1]) {
+        // When the element is a string, just return it and completely avoid
+        // allocating another string.
+        case (str: String): {
+          return str;
+        }
+
+        // When the element is a smi, use StringRepeat to quickly build a memory
+        // efficient separator repeated string.
+        case (nofSeparators: Smi): {
+          dcheck(nofSeparators > 0);
+          return StringRepeat(context, sep, nofSeparators);
+        }
+        case (Object): {
+          unreachable;
+        }
+      }
+    }
+
+    const length: uint32 = Convert<uint32>(Unsigned(buffer.totalStringLength));
++   Print('BufferJoin length', Convert<uintptr>(length));
+    const r: String = buffer.isOneByte ? AllocateSeqOneByteString(length) :
+                                         AllocateSeqTwoByteString(length);
+-   return CallJSArrayArrayJoinConcatToSequentialString(
++   const result: String = CallJSArrayArrayJoinConcatToSequentialString(
+        buffer.head, buffer.index, sep, r);
+    
++   Print('result:');
++   PrintStringSimple(result);
++   return result;
+  }
+```
+
+![](src_BufferJoin.png)
+
+![](src_BufferJoin_2.png)
+
+`src/builtins/array-join.tq`
+```diff
+  // Calculates the running total length of the resulting string.  If the
+  // calculated length exceeds the maximum string length (see
+  // String::kMaxLength), throws a range error.
+  macro AddStringLength(
+      implicit context: Context)(lenA: intptr, lenB: intptr): intptr {
+    try {
+      const length: intptr = TryIntPtrAdd(lenA, lenB) otherwise IfOverflow;
+      if (length > kStringMaxLength) goto IfOverflow;
++     Print("AddStringLength Length", Convert<uintptr>(length));
+      return length;
+    } label IfOverflow deferred {
+      ThrowInvalidStringLength(context);
+    }
+  }
+```
+
 ## tq
 
 https://v8.dev/docs/torque#how-torque-generates-code
