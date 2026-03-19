@@ -472,7 +472,7 @@ i=2:  "1" + "2" → "12"                   (len=2, copy: SeqString)
 i=9:  "12345678" + "9" → "123456789"     (len=9, copy: SeqString)
 i=10: "123456789" + "10" → "12345678910" (len=11, copy: SeqString)
 i=11: "12345678910" + "11"               (len=13 ≥ kMinLength → ConsString!)
-                                     ┌─────────────────┐
+                                     ┌──────────────────┐
                                      │   ConsString     │
                                      │   length = 13    │
                                      ├────────┬─────────┤
@@ -483,7 +483,7 @@ i=11: "12345678910" + "11"               (len=13 ≥ kMinLength → ConsString!)
                                   (SeqString)   (SeqString)
 
 i=12: cons_13 + "12"               (len=15 ≥ 13 → ConsString)
-                                     ┌─────────────────┐
+                                     ┌──────────────────┐
                                      │   ConsString     │
                                      │   length = 15    │
                                      ├────────┬─────────┤
