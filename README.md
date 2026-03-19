@@ -101,11 +101,11 @@ for (let i = 0; i < 1_000; i++) {
 
 ![](Memory_Snapshots_try_asis.png)
 
-#### Try 2 snapshots
+### Try 2 snapshots
 
 ![](Memory_Snapshots_try_2_snapshots.png)
 
-#### With classes
+### With classes
 
 ```js
 function FooPlus() {
@@ -129,7 +129,7 @@ fooJoin = new FooJoin();
 
 ![](Memory_Snapshots_with_classes.png)
 
-#### Using strings
+### Using strings
 
 ```js
 function FooPlus() {
@@ -155,7 +155,7 @@ fooJoin.str[0];          // <---
 
 ![](Memory_Snapshots_Using_strings.png)
 
-#### 20 elements
+### 20 elements
 
 ```js
 function FooPlus() {
@@ -169,7 +169,7 @@ fooPlus = new FooPlus();
 
 ![](Memory_Snapshots_20_elements.png)
 
-#### 11 elements
+### 11 elements
 
 ```js
 function FooPlus() {
@@ -182,12 +182,6 @@ fooPlus = new FooPlus();
 ```
 
 ![](Memory_Snapshots_11_elements.png)
-
-#### more interesting things
-
-![](./ConsOneTwoByteString.jpg)
-
-![](./InternalizedString_Code.jpg)
 
 ## Debug sources
 
@@ -207,3 +201,6 @@ https://v8.dev/docs/torque#how-torque-generates-code
   https://www.jfokus.se/jfokus20-preso/V8-Torque--A-Typed-Language-to-Implement-JavaScript.pdf
 - Alternative Installing V8 on a Mac doc
   https://gist.github.com/kevincennis/0cd2138c78a07412ef21
+- Devtools Memory Snapshots Extra
+  [./DevTools_Memory_Snapshots_Extra](./DevTools_Memory_Snapshots_Extra)
+
