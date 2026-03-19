@@ -83,7 +83,7 @@ echo "console.log('Hello world!');" > test.js
 1. download from github: [./build_v8_d8.mp4](./build_v8_d8.mp4)
 2. see on yandex disk: [https://disk.yandex.ru/i/pvOYS6Pa6MfYZA](https://disk.yandex.ru/i/pvOYS6Pa6MfYZA)
 
-### DevTools Memory Snapshots
+## DevTools Memory Snapshots
 
 #### `+=`
 
@@ -117,11 +117,11 @@ fooJoin = new FooJoin();
 
 ![](./InternalizedString_Object.jpg)
 
-### Debug sources
+## Debug sources
 
 https://github.com/v8/v8/commit/c68f8492328eff48b8dcc04164431b7147706087
 
-### tq
+## tq
 
 https://v8.dev/docs/torque#how-torque-generates-code
 
