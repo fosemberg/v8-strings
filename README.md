@@ -464,62 +464,70 @@ str[0];
 ```
 str = ''; for (let i = 1; i <= 20; i++) { str += i; } str[0];
 
-Phase 1+2: StringAdd + AllocateConsString (per each +=)
-──────────────────────────────────────────────────────────
+Phase 1: StringAdd → new SeqString (len < 13, full copy each time)
+──────────────────────────────────────────────────────────────────
 
-i=1:  "" + "1" → "1"                     (len=1, copy: SeqString)
-i=2:  "1" + "2" → "12"                   (len=2, copy: SeqString)
- ...                                       (len < 13 → copy into new SeqString)
-i=9:  "12345678" + "9" → "123456789"     (len=9, copy: SeqString)
-i=10: "123456789" + "10" → "12345678910" (len=11, copy: SeqString)
+i=1:  "" + "1"           → allocate SeqString(1),  copy "1"
+i=2:  "1" + "2"          → allocate SeqString(2),  copy "1"+"2"
+i=3:  "12" + "3"         → allocate SeqString(3),  copy "12"+"3"
+ ...                        each += allocates a new string and copies everything
+i=9:  "12345678" + "9"   → allocate SeqString(9),  copy "12345678"+"9"
+i=10: "123456789" + "10" → allocate SeqString(11), copy "123456789"+"10"
+
+Phase 1+2: StringAdd + AllocateConsString (len ≥ 13, no copy — just a pointer)
+───────────────────────────────────────────────────────────────────────────────
+
 i=11: "12345678910" + "11"               (len=13 ≥ kMinLength → ConsString!)
-                                     ┌──────────────────┐
-                                     │   ConsString     │
-                                     │   length = 13    │
-                                     ├────────┬─────────┤
-                                     │ first  │ second  │
-                                     └───┬────┴────┬────┘
-                                         │         │
-                                  "12345678910"   "11"
-                                  (SeqString)   (SeqString)
 
-i=12: cons_13 + "12"               (len=15 ≥ 13 → ConsString)
-                                     ┌──────────────────┐
-                                     │   ConsString     │
-                                     │   length = 15    │
-                                     ├────────┬─────────┤
-                                     │ first  │ second  │
-                                     └───┬────┴────┬────┘
-                                         │         │
-                                    ConsString    "12"
-                                    (len=13)    (SeqString)
-                                    ┌───┴───┐
-                              "12345678910" "11"
+                    ConsString (len=13)
+                    ╱           ╲
+             "12345678910"      "11"
+              (SeqString)     (SeqString)
+
+i=12: cons(13) + "12"                    (len=15 ≥ 13 → ConsString)
+
+                    ConsString (len=15)
+                    ╱           ╲
+             ConsString(13)     "12"
+             ╱          ╲
+      "12345678910"     "11"
+
+i=13: cons(15) + "13"                    (len=17 ≥ 13 → ConsString)
+
+                    ConsString (len=17)
+                    ╱           ╲
+             ConsString(15)     "13"
+             ╱          ╲
+      ConsString(13)    "12"
+      ╱          ╲
+"12345678910"   "11"
  ...
-i=20: cons_29 + "20"               (len=31 ≥ 13 → ConsString)
-                                         ConsString (len=31)
-                                        ╱           ╲
-                                  ConsString(29)    "20"
-                                  ╱          ╲
-                            ConsString(27)   "19"
-                            ╱          ╲
-                      ConsString(25)   "18"
-                       ...
-                 ConsString(13)
-                 ╱           ╲
-          "12345678910"      "11"
+
+i=20: cons(29) + "20"                    (len=31 ≥ 13 → ConsString)
+
+                         ConsString (len=31)
+                         ╱           ╲
+                  ConsString(29)     "20"
+                  ╱          ╲
+            ConsString(27)   "19"
+            ╱          ╲
+      ConsString(25)   "18"
+       ...
+ ConsString(13)
+ ╱           ╲
+"12345678910" "11"
 
 
 Phase 3: Flatten (triggered by str[0])
 ──────────────────────────────────────
 
-                ConsString (len=31)            SeqOneByteString (len=31)
-                ╱           ╲                  ┌───────────────────────────────┐
-          ConsString(29)    "20"     ──►       │1234567891011121314151617181920│
-          ╱          ╲                         └───────────────────────────────┘
-    ConsString(27)   "19"
-     ...                                 Allocate one SeqString(31),
-                                         walk the tree, WriteToFlat all leaves
+         ConsString (len=31)                SeqOneByteString (len=31)
+         ╱           ╲                      ┌───────────────────────────────┐
+  ConsString(29)     "20"        ──►        │1234567891011121314151617181920│
+  ╱          ╲                              └───────────────────────────────┘
+ConsString(27) "19"
+ ...                                   Allocate one SeqString(31),
+                                       walk the tree, WriteToFlat all leaves
 ```
 
 #### Phase 1: StringAdd
