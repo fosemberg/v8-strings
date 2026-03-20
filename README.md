@@ -169,38 +169,6 @@ test scripts: `test_js/join.js`, `test_js/ConsString.js`
 
 `arr.join('')` works in 3 phases:
 
-```
-["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"].join('')
-
-Phase 1: Collect                    Phase 2: Allocate        Phase 3: Copy
-─────────────────                   ─────────────────        ─────────────────
-
-Buffer (FixedArray, capacity=21)    SeqOneByteString         SeqOneByteString
-┌──────────────────────────────┐    (length=31)              (length=31)
-│ [0] next_chunk = Undefined   │    ┌───────────────────┐    ┌───────────────────┐
-│ [1] "1"    totalLen += 1 → 1 │    │                   │    │1234567891011121314│
-│ [2] "2"    totalLen += 1 → 2 │    │   31 bytes of     │    │151617181920       │
-│ [3] "3"    totalLen += 1 → 3 │    │   uninitialized   │    │                   │
-│ [4] "4"    totalLen += 1 → 4 │    │   memory          │    │ WriteToFlat:      │
-│ [5] "5"    totalLen += 1 → 5 │    │                   │    │  "1"  → 1 byte    │
-│ [6] "6"    totalLen += 1 → 6 │    └───────────────────┘    │  "2"  → 1 byte    │
-│ [7] "7"    totalLen += 1 → 7 │                             │  ...              │
-│ [8] "8"    totalLen += 1 → 8 │    AllocateSeqOneByteString │  "10" → 2 bytes   │
-│ [9] "9"    totalLen += 1 → 9 │    (totalLen = 31)          │  ...              │
-│[10] "10"   totalLen += 2 →11 │                             │  "20" → 2 bytes   │
-│[11] "11"   totalLen += 2 →13 │                             └───────────────────┘
-│[12] "12"   totalLen += 2 →15 │
-│[13] "13"   totalLen += 2 →17 │    One allocation,          One pass over
-│[14] "14"   totalLen += 2 →19 │    exact size known         buffer chunks
-│[15] "15"   totalLen += 2 →21 │
-│[16] "16"   totalLen += 2 →23 │
-│[17] "17"   totalLen += 2 →25 │
-│[18] "18"   totalLen += 2 →27 │
-│[19] "19"   totalLen += 2 →29 │
-│[20] "20"   totalLen += 2 →31 │
-└──────────────────────────────┘
-```
-
 Entry point:
 
 [`src/builtins/array-join.tq`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-42030b040dea1fc49191c1982c9a87a91a1dc9a5b8c20aaeac7e4c750583ef34R781) — `ArrayPrototypeJoin`
@@ -431,78 +399,43 @@ str[0];
 1234567891011121314151617181920
 ```
 
+### Scheme
+
+```
+["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"].join('')
+
+Phase 1: Collect                    Phase 2: Allocate        Phase 3: Copy
+─────────────────                   ─────────────────        ─────────────────
+
+Buffer (FixedArray, capacity=21)    SeqOneByteString         SeqOneByteString
+┌──────────────────────────────┐    (length=31)              (length=31)
+│ [0] next_chunk = Undefined   │    ┌───────────────────┐    ┌───────────────────┐
+│ [1] "1"    totalLen += 1 → 1 │    │                   │    │1234567891011121314│
+│ [2] "2"    totalLen += 1 → 2 │    │   31 bytes of     │    │151617181920       │
+│ [3] "3"    totalLen += 1 → 3 │    │   uninitialized   │    │                   │
+│ [4] "4"    totalLen += 1 → 4 │    │   memory          │    │ WriteToFlat:      │
+│ [5] "5"    totalLen += 1 → 5 │    │                   │    │  "1"  → 1 byte    │
+│ [6] "6"    totalLen += 1 → 6 │    └───────────────────┘    │  "2"  → 1 byte    │
+│ [7] "7"    totalLen += 1 → 7 │                             │  ...              │
+│ [8] "8"    totalLen += 1 → 8 │    AllocateSeqOneByteString │  "10" → 2 bytes   │
+│ [9] "9"    totalLen += 1 → 9 │    (totalLen = 31)          │  ...              │
+│[10] "10"   totalLen += 2 →11 │                             │  "20" → 2 bytes   │
+│[11] "11"   totalLen += 2 →13 │                             └───────────────────┘
+│[12] "12"   totalLen += 2 →15 │
+│[13] "13"   totalLen += 2 →17 │    One allocation,          One pass over
+│[14] "14"   totalLen += 2 →19 │    exact size known         buffer chunks
+│[15] "15"   totalLen += 2 →21 │
+│[16] "16"   totalLen += 2 →23 │
+│[17] "17"   totalLen += 2 →25 │
+│[18] "18"   totalLen += 2 →27 │
+│[19] "19"   totalLen += 2 →29 │
+│[20] "20"   totalLen += 2 →31 │
+└──────────────────────────────┘
+```
+
 ### ConsString (`+=`). How it's working
 
 `str += i` works in 3 phases:
-
-```
-str = ''; for (let i = 1; i <= 20; i++) { str += i; } str[0];
-
-Phase 1: StringAdd → new SeqString (len < 13, full copy each time)
-──────────────────────────────────────────────────────────────────
-
-i=1:  "" + "1"           → allocate SeqString(1),  copy "1"
-i=2:  "1" + "2"          → allocate SeqString(2),  copy "1"+"2"
-i=3:  "12" + "3"         → allocate SeqString(3),  copy "12"+"3"
- ...                        each += allocates a new string and copies everything
-i=9:  "12345678" + "9"   → allocate SeqString(9),  copy "12345678"+"9"
-i=10: "123456789" + "10" → allocate SeqString(11), copy "123456789"+"10"
-
-Phase 1+2: StringAdd + AllocateConsString (len ≥ 13, no copy — just a pointer)
-───────────────────────────────────────────────────────────────────────────────
-
-i=11: "12345678910" + "11"               (len=13 ≥ kMinLength → ConsString!)
-
-                    ConsString (len=13)
-                    ╱           ╲
-             "12345678910"      "11"
-              (SeqString)     (SeqString)
-
-i=12: cons(13) + "12"                    (len=15 ≥ 13 → ConsString)
-
-                    ConsString (len=15)
-                    ╱           ╲
-             ConsString(13)     "12"
-             ╱          ╲
-      "12345678910"     "11"
-
-i=13: cons(15) + "13"                    (len=17 ≥ 13 → ConsString)
-
-                    ConsString (len=17)
-                    ╱           ╲
-             ConsString(15)     "13"
-             ╱          ╲
-      ConsString(13)    "12"
-      ╱          ╲
-"12345678910"   "11"
- ...
-
-i=20: cons(29) + "20"                    (len=31 ≥ 13 → ConsString)
-
-                         ConsString (len=31)
-                         ╱           ╲
-                  ConsString(29)     "20"
-                  ╱          ╲
-            ConsString(27)   "19"
-            ╱          ╲
-      ConsString(25)   "18"
-       ...
- ConsString(13)
- ╱           ╲
-"12345678910" "11"
-
-
-Phase 3: Flatten (triggered by str[0])
-──────────────────────────────────────
-
-         ConsString (len=31)                SeqOneByteString (len=31)
-         ╱           ╲                      ┌───────────────────────────────┐
-  ConsString(29)     "20"        ──►        │1234567891011121314151617181920│
-  ╱          ╲                              └───────────────────────────────┘
-ConsString(27) "19"
- ...                                   Allocate one SeqString(31),
-                                       walk the tree, WriteToFlat all leaves
-```
 
 #### Phase 1: StringAdd
 
@@ -744,7 +677,109 @@ str[0]
 [Phase 3: Flatten] allocating OneByte SeqString, length=31
 ```
 
+### Scheme
+
+```
+str = ''; for (let i = 1; i <= 20; i++) { str += i; } str[0];
+
+Phase 1: StringAdd → new SeqString (len < 13, full copy each time)
+──────────────────────────────────────────────────────────────────
+
+i=1:  "" + "1"           → allocate SeqString(1),  copy "1"
+i=2:  "1" + "2"          → allocate SeqString(2),  copy "1"+"2"
+i=3:  "12" + "3"         → allocate SeqString(3),  copy "12"+"3"
+ ...                        each += allocates a new string and copies everything
+i=9:  "12345678" + "9"   → allocate SeqString(9),  copy "12345678"+"9"
+i=10: "123456789" + "10" → allocate SeqString(11), copy "123456789"+"10"
+
+Phase 1+2: StringAdd + AllocateConsString (len ≥ 13, no copy — just a pointer)
+───────────────────────────────────────────────────────────────────────────────
+
+i=11: "12345678910" + "11"               (len=13 ≥ kMinLength → ConsString!)
+
+                    ConsString (len=13)
+                    ╱           ╲
+             "12345678910"      "11"
+              (SeqString)     (SeqString)
+
+i=12: cons(13) + "12"                    (len=15 ≥ 13 → ConsString)
+
+                    ConsString (len=15)
+                    ╱           ╲
+             ConsString(13)     "12"
+             ╱          ╲
+      "12345678910"     "11"
+
+i=13: cons(15) + "13"                    (len=17 ≥ 13 → ConsString)
+
+                    ConsString (len=17)
+                    ╱           ╲
+             ConsString(15)     "13"
+             ╱          ╲
+      ConsString(13)    "12"
+      ╱          ╲
+"12345678910"   "11"
+ ...
+
+i=20: cons(29) + "20"                    (len=31 ≥ 13 → ConsString)
+
+                         ConsString (len=31)
+                         ╱           ╲
+                  ConsString(29)     "20"
+                  ╱          ╲
+            ConsString(27)   "19"
+            ╱          ╲
+      ConsString(25)   "18"
+       ...
+ ConsString(13)
+ ╱           ╲
+"12345678910" "11"
+
+
+Phase 3: Flatten (triggered by str[0])
+──────────────────────────────────────
+
+         ConsString (len=31)                SeqOneByteString (len=31)
+         ╱           ╲                      ┌───────────────────────────────┐
+  ConsString(29)     "20"        ──►        │1234567891011121314151617181920│
+  ╱          ╲                              └───────────────────────────────┘
+ConsString(27) "19"
+ ...                                   Allocate one SeqString(31),
+                                       walk the tree, WriteToFlat all leaves
+```
+
 ## not balanced ConsString vs SeqString vs balanced ConsString
+
+```diff
+  macro BufferJoin(implicit context: Context)(buffer: Buffer,
+                      sep: String): String {
+    dcheck(IsValidPositiveSmi(buffer.totalStringLength));
+    if (buffer.totalStringLength == 0) return kEmptyString;
+
+    // Fast path when there's only one chunk and one buffer element.
+    if (buffer.index == 2 && buffer.head == buffer.chunk) {
+      const chunk: FixedArray = buffer.head;
+      typeswitch (chunk.objects[1]) {
+        case (str: String): {
+          return str;
+        }
+        case (nofSeparators: Smi): {
+          dcheck(nofSeparators > 0);
+          //     \/ \/ \/ \/
+          return StringRepeat(context, sep, nofSeparators); // <------
+          //     /\ /\ /\ /\
+        }
+        case (Object): {
+          unreachable;
+        }
+      }
+    }
+
+    // ...
+  }
+```
+
+[https://github.com/v8/v8/blob/b5db50f99bc02b1713a28c1718c4bd666264c9e7/src/builtins/array-join.tq#L342](https://github.com/v8/v8/blob/b5db50f99bc02b1713a28c1718c4bd666264c9e7/src/builtins/array-join.tq#L342)
 
 ```js
 LEN = 1_000_000;
@@ -821,37 +856,6 @@ Leaves are flat SeqStrings, both halves reference the same leaf.
  "xxxxxxx"  "xxxxxxxx" "xxxxxxx" "xxxxxxxx" "xxxxxxx" "xxxxxxxx"
  (SeqStr 7) (SeqStr 8)   ↑same     ↑same      ↑same     ↑same
 ```
-
-```diff
-  macro BufferJoin(implicit context: Context)(buffer: Buffer,
-                      sep: String): String {
-    dcheck(IsValidPositiveSmi(buffer.totalStringLength));
-    if (buffer.totalStringLength == 0) return kEmptyString;
-
-    // Fast path when there's only one chunk and one buffer element.
-    if (buffer.index == 2 && buffer.head == buffer.chunk) {
-      const chunk: FixedArray = buffer.head;
-      typeswitch (chunk.objects[1]) {
-        case (str: String): {
-          return str;
-        }
-        case (nofSeparators: Smi): {
-          dcheck(nofSeparators > 0);
-          //     \/ \/ \/ \/
-          return StringRepeat(context, sep, nofSeparators); // <------
-          //     /\ /\ /\ /\
-        }
-        case (Object): {
-          unreachable;
-        }
-      }
-    }
-
-    // ...
-  }
-```
-
-[https://github.com/v8/v8/blob/b5db50f99bc02b1713a28c1718c4bd666264c9e7/src/builtins/array-join.tq#L342](https://github.com/v8/v8/blob/b5db50f99bc02b1713a28c1718c4bd666264c9e7/src/builtins/array-join.tq#L342)
 
 ![](./images/not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_after_flat.png)
 
