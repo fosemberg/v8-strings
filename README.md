@@ -258,7 +258,7 @@ Allocate a single `SeqOneByteString` (or `SeqTwoByteString`) with the total leng
         }
         case (nofSeparators: Smi): {
           dcheck(nofSeparators > 0);
-          return StringRepeat(context, sep, nofSeparators);
+          return StringRepeat(context, sep, nofSeparators); // <--- notice
         }
         case (Object): {
           unreachable;
@@ -315,6 +315,13 @@ Copy all collected chunks into the pre-allocated sequential string.
 
 [`src/objects/objects.cc`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-74dfba41a5031dfde1d477d7e4f8fb76791e1d7f8e15a2bb354366bda8ce89bcR4268) — `WriteChunkListToFlat` (key parts)
 ```diff
+template <typename sinkchar>
+void WriteChunkListToFlat(Tagged<FixedArray> chunk_list_head,
+                          uint32_t last_chunk_length, Tagged<String> separator,
+                          sinkchar* sink, uint32_t sink_length) {
+
+  // ...
+
 + uint32_t chunk_index = 0;
   while (true) {
     Tagged<Object> maybe_next_chunk = chunk->get(0);
