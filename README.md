@@ -172,6 +172,11 @@ test scripts: `test_js/join.js`, `test_js/ConsString.js`
 Entry point:
 
 [`src/builtins/array-join.tq`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-42030b040dea1fc49191c1982c9a87a91a1dc9a5b8c20aaeac7e4c750583ef34R781) — `ArrayPrototypeJoin`
+
+What is `tq`?
+
+[https://v8.dev/docs/torque#how-torque-generates-code](https://v8.dev/docs/torque#how-torque-generates-code)
+
 ```diff
   transitioning javascript builtin ArrayPrototypeJoin(
       js-implicit context: NativeContext, receiver: JSAny)(...arguments): JSAny {
@@ -858,10 +863,6 @@ Leaves are flat SeqStrings, both halves reference the same leaf.
 ```
 
 ![](./images/not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_after_flat.png)
-
-## tq
-
-https://v8.dev/docs/torque#how-torque-generates-code
 
 ## Related links
 
