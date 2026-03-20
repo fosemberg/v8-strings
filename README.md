@@ -196,6 +196,26 @@ What is `tq`?
 
 Iterate over array elements, accumulate their string lengths into a `Buffer`.
 
+[`src/builtins/array-join.tq`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-42030b040dea1fc49191c1982c9a87a91a1dc9a5b8c20aaeac7e4c750583ef34R313) — `NewBuffer`
+```diff
+  macro NewBuffer(len: uintptr, sep: String): Buffer {
+    const cappedBufferSize: intptr =
+        len >= kMaxBufferChunkSize ? kMaxBufferChunkSize : Signed(len + 1);
+    dcheck(cappedBufferSize > 0);
+    const chunk = AllocateZeroedFixedArray(cappedBufferSize);
++   Print("[Phase 1: Collect] NewBuffer capacity", Convert<uintptr>(cappedBufferSize));
+    chunk.objects[0] = Undefined;
+    return Buffer{
+      head: chunk,
+      chunk: chunk,
+      index: 1,
+      totalStringLength: 0,
+      isOneByte: IsOneByteStringMap(sep.map),
+      lastString: Null
+    };
+  }
+```
+
 [`src/builtins/array-join.tq`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-42030b040dea1fc49191c1982c9a87a91a1dc9a5b8c20aaeac7e4c750583ef34R191) — `Buffer.Add`
 ```diff
   macro Add(
@@ -215,26 +235,6 @@ Iterate over array elements, accumulate their string lengths into a `Buffer`.
       this.lastString = str;
     }
     this.isOneByte = IsOneByteStringMap(str.map) & this.isOneByte;
-  }
-```
-
-[`src/builtins/array-join.tq`](https://github.com/fosemberg/v8/commit/a483d91a7adcd43a72d75d1eb924eaba361b5131#diff-42030b040dea1fc49191c1982c9a87a91a1dc9a5b8c20aaeac7e4c750583ef34R313) — `NewBuffer`
-```diff
-  macro NewBuffer(len: uintptr, sep: String): Buffer {
-    const cappedBufferSize: intptr =
-        len >= kMaxBufferChunkSize ? kMaxBufferChunkSize : Signed(len + 1);
-    dcheck(cappedBufferSize > 0);
-    const chunk = AllocateZeroedFixedArray(cappedBufferSize);
-+   Print("[Phase 1: Collect] NewBuffer capacity", Convert<uintptr>(cappedBufferSize));
-    chunk.objects[0] = Undefined;
-    return Buffer{
-      head: chunk,
-      chunk: chunk,
-      index: 1,
-      totalStringLength: 0,
-      isOneByte: IsOneByteStringMap(sep.map),
-      lastString: Null
-    };
   }
 ```
 
