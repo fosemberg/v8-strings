@@ -817,14 +817,14 @@ new Array(LEN).fill('x').join('') allocates one flat SeqString.
 ────────────────────────────────────────────────────────────────────────────────────────────────
 
 new Array(LEN + 1).join('x') uses StringRepeat → balanced ConsString tree.
-Splits by halving recursively. ~log2(1_000_000) ≈ 20 nodes × ~20 bytes ≈ 0.5 kB
+Splits by halving recursively. Both halves reference the same child → 0.5 kB total.
 Leaves are flat SeqStrings, both halves reference the same leaf.
 
                       ConsString (len=1000000)
                       ╱                      ╲
              ConsString(500000)           ConsString(500000)
                ╱            ╲            ╱            ╲
-    ConsString(250000)      ...        ...    ConsString(250000)
+    ConsString(250000)       ...       ...    ConsString(250000)
             /                  \                    \
           ...                  ...                  ...
          ╱   ╲                ╱   ╲                ╱   ╲
