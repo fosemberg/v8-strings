@@ -5,23 +5,13 @@ QR Code to this page:
 ![](images/v8_strings_qr_code.png)
 
 ## What are we going to compare
-### `+=` code
 
 ```js
-str = '';
-for (let i = 0; i < 1_000; i++) {
-  str += i;
-}
-```
+'a' + 'b';
 
-### `join` code
+// vs
 
-```js
-arr = [];
-for (let i = 0; i < 1_000; i++) {
-	arr.push(i);
-}
-str = arr.join('');
+['a', 'b'].join('');
 ```
 
 ## What to build
