@@ -22,8 +22,8 @@ str = '';
 arr = [];
 for (let i = 0; i < 1_000; i++) {
 	arr.push(i);
-	str = arr.join('');
 }
+str = arr.join('');
 ```
 
 ### JSBench.Me
