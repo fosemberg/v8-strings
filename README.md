@@ -832,6 +832,37 @@ Leaves are flat SeqStrings, both halves reference the same leaf.
  (SeqStr 7) (SeqStr 8)   ↑same     ↑same      ↑same     ↑same
 ```
 
+```diff
+  macro BufferJoin(implicit context: Context)(buffer: Buffer,
+                      sep: String): String {
+    dcheck(IsValidPositiveSmi(buffer.totalStringLength));
+    if (buffer.totalStringLength == 0) return kEmptyString;
+
+    // Fast path when there's only one chunk and one buffer element.
+    if (buffer.index == 2 && buffer.head == buffer.chunk) {
+      const chunk: FixedArray = buffer.head;
+      typeswitch (chunk.objects[1]) {
+        case (str: String): {
+          return str;
+        }
+        case (nofSeparators: Smi): {
+          dcheck(nofSeparators > 0);
+          //     \/ \/ \/ \/
+          return StringRepeat(context, sep, nofSeparators); // <------
+          //     /\ /\ /\ /\
+        }
+        case (Object): {
+          unreachable;
+        }
+      }
+    }
+
+    // ...
+  }
+```
+
+[https://github.com/v8/v8/blob/b5db50f99bc02b1713a28c1718c4bd666264c9e7/src/builtins/array-join.tq#L342](https://github.com/v8/v8/blob/b5db50f99bc02b1713a28c1718c4bd666264c9e7/src/builtins/array-join.tq#L342)
+
 ![](./images/not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_after_flat.png)
 
 ## tq
