@@ -822,13 +822,14 @@ Leaves are flat SeqStrings, both halves reference the same leaf.
 
                       ConsString (len=1000000)
                       ╱                      ╲
-          ConsString(500000)           ConsString(500000)
-          ╱            ╲               ╱            ╲
-    ConsString(250000)  ...         ...       ConsString(250000)
-     ...                                        ...
-      ╲               ╲                ╲               ╲
- "xxxxxxx"       "xxxxxxxx"      "xxxxxxx"       "xxxxxxxx"
- (SeqString)     (SeqString)      ↑ same obj      ↑ same obj
+             ConsString(500000)           ConsString(500000)
+               ╱            ╲            ╱            ╲
+    ConsString(250000)      ...        ...    ConsString(250000)
+            /                  \                    \
+          ...                  ...                  ...
+         ╱   ╲                ╱   ╲                ╱   ╲
+ "xxxxxxx"  "xxxxxxxx" "xxxxxxx" "xxxxxxxx" "xxxxxxx" "xxxxxxxx"
+ (SeqStr 7) (SeqStr 8)   ↑same     ↑same      ↑same     ↑same
 ```
 
 ![](not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_after_flat.png)
