@@ -485,15 +485,18 @@ Each `+=` calls `StringAdd` — receives left and right strings.
       TVARIABLE(String, var_left, left);
       TVARIABLE(String, var_right, right);
       Label non_cons(this, {&var_left, &var_right});
-      GotoIf(Uint32LessThan(new_length, Uint32Constant(ConsString::kMinLength)),
-             &non_cons);
+      GotoIf(Uint32LessThan(new_length, Uint32Constant(ConsString::kMinLength)), // <-
+             &non_cons); // goto non_cons --->
 
       result =
           AllocateConsString(new_length, var_left.value(), var_right.value());
       Goto(&done);
 
-      BIND(&non_cons);
+      BIND(&non_cons); // <--- non_cons
       Comment("Full string concatenate");
+      TNode<Int32T> left_instance_type = LoadInstanceType(var_left.value());
+      TNode<Int32T> right_instance_type = LoadInstanceType(var_right.value());
+
       // ... copies left+right into a new SeqString (short strings path)
     }
 
