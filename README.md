@@ -773,7 +773,7 @@ function FooJoinSomething() {
 fooJoinSomething = new FooJoinSomething();
 
 function FooJoinWholes() {
-  this.str = new Array(LEN).join('x');
+  this.str = new Array(LEN + 1).join('x');
 }
 fooJoinWholes = new FooJoinWholes();
 ```
@@ -781,14 +781,54 @@ fooJoinWholes = new FooJoinWholes();
 ![](not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_construct.png)
 
 ```
-ConsString. Unbalanced binary tree
-plus           - 20_000.0 kB
+1. plus (+=)  —  ConsString. Unbalanced binary tree  —  20_000.0 kB
+─────────────────────────────────────────────────────────────────────
 
-SeqString. Flat string
-join something -  1_000.0 kB
+Each += creates a ConsString node (~20 bytes).
+1_000_000 nodes × 20 bytes ≈ 20_000 kB
 
-ConsString. Balanced binary tree with references to a flat string
-join wholes    -      0.5 kB
+                ConsString (len=1000000)
+                ╱            ╲
+         ConsString(999999)  "x"
+         ╱            ╲
+   ConsString(999998) "x"
+   ╱                ╲
+ ConsString(999997) "x"     Every node stores: first_, second_, length_, hash_
+  ...                       All right children point to separate "x" SeqStrings
+ ConsString(13)
+ ╱              ╲
+"xxxxxxxxxxxx"  "x"            ← first ConsString node (len=13 ≥ kMinLength)
+(SeqString=12)  (SeqString=1)    below 13: += copies into flat SeqString
+
+
+2. join something  —  SeqString. Flat string  —  1_000.0 kB
+─────────────────────────────────────────────────────────────
+
+new Array(LEN).fill('x').join('') allocates one flat SeqString.
+1_000_000 bytes = 1_000 kB
+
+┌──────────────────────────────────────────────────┐
+│ x x x x x x x x x x x x x x ... x x x x x x x    │  SeqOneByteString
+│                 1_000_000 bytes                  │  (one contiguous allocation)
+└──────────────────────────────────────────────────┘
+
+
+3. join wholes  —  ConsString. Balanced binary tree with references to a flat string  —  0.5 kB
+────────────────────────────────────────────────────────────────────────────────────────────────
+
+new Array(LEN + 1).join('x') uses StringRepeat → balanced ConsString tree.
+Splits by halving recursively. ~log2(1_000_000) ≈ 20 nodes × ~20 bytes ≈ 0.5 kB
+Leaves are flat SeqStrings, both halves reference the same leaf.
+
+                      ConsString (len=1000000)
+                      ╱                      ╲
+          ConsString(500000)           ConsString(500000)
+          ╱            ╲               ╱            ╲
+    ConsString(250000)  ...         ...       ConsString(250000)
+     ...                                        ...
+      ╲               ╲                ╲               ╲
+ "xxxxxxx"       "xxxxxxxx"      "xxxxxxx"       "xxxxxxxx"
+ (SeqString)     (SeqString)      ↑ same obj      ↑ same obj
 ```
 
 ![](not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_after_flat.png)
