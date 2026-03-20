@@ -781,13 +781,13 @@ fooJoinWholes = new FooJoinWholes();
 ![](not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_construct.png)
 
 ```
-ConsString. Бинарное несбалансированное дерево
+ConsString. Unbalanced binary tree
 plus           - 20_000.0 kB
 
-SeqString. Плоская строка
+SeqString. Flat string
 join something -  1_000.0 kB
 
-ConsString. Бинарного сбалансированное дерево с ссылками на одну строку
+ConsString. Balanced binary tree with references to a flat string
 join wholes    -      0.5 kB
 ```
 
