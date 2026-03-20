@@ -461,20 +461,7 @@ Each `+=` calls `StringAdd` — receives left and right strings.
 +   Print("[Phase 1: StringAdd] left_len", LoadStringLengthAsWord32(left));
 +   Print("[Phase 1: StringAdd] right_len", LoadStringLengthAsWord32(right));
 
-    TVARIABLE(String, result);
-    Label check_right(this), runtime(this, Label::kDeferred), cons(this),
-        done(this, &result);
-
-    TNode<Uint32T> left_length = LoadStringLengthAsWord32(left);
-    GotoIfNot(Word32Equal(left_length, Uint32Constant(0)), &check_right);
-    result = right;
-    Goto(&done);
-
-    BIND(&check_right);
-    TNode<Uint32T> right_length = LoadStringLengthAsWord32(right);
-    GotoIfNot(Word32Equal(right_length, Uint32Constant(0)), &cons);
-    result = left;
-    Goto(&done);
+    // ...
 
     BIND(&cons);
     {
@@ -494,6 +481,7 @@ Each `+=` calls `StringAdd` — receives left and right strings.
 
       BIND(&non_cons); // <--- non_cons
       Comment("Full string concatenate");
++     Print("[Phase 1: StringAdd] Full string concatenate");
       TNode<Int32T> left_instance_type = LoadInstanceType(var_left.value());
       TNode<Int32T> right_instance_type = LoadInstanceType(var_right.value());
 
@@ -631,22 +619,31 @@ str[0]
 [Phase 1: StringAdd] right_len: 1
 [Phase 1: StringAdd] left_len: 1
 [Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] Full string concatenate
 [Phase 1: StringAdd] left_len: 2
 [Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] Full string concatenate
 [Phase 1: StringAdd] left_len: 3
 [Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] Full string concatenate
 [Phase 1: StringAdd] left_len: 4
 [Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] Full string concatenate
 [Phase 1: StringAdd] left_len: 5
 [Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] Full string concatenate
 [Phase 1: StringAdd] left_len: 6
 [Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] Full string concatenate
 [Phase 1: StringAdd] left_len: 7
 [Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] Full string concatenate
 [Phase 1: StringAdd] left_len: 8
 [Phase 1: StringAdd] right_len: 1
+[Phase 1: StringAdd] Full string concatenate
 [Phase 1: StringAdd] left_len: 9
 [Phase 1: StringAdd] right_len: 2
+[Phase 1: StringAdd] Full string concatenate
 [Phase 1: StringAdd] left_len: 11
 [Phase 1: StringAdd] right_len: 2
 [Phase 2: AllocateConsString] left_len: 11
