@@ -65,7 +65,7 @@ echo "console.log('Hello world!');" > test.js
 
 ## DevTools Memory Snapshots
 
-### Try code asis
+### Try code with bigger string
 
 ```js
 str = '';
