@@ -4,8 +4,7 @@ QR Code to this page:
 
 ![](images/v8_strings_qr_code.png)
 
-## Speedtest `+=` vs `join`
-
+## What are we going to compare
 ### `+=` code
 
 ```js
@@ -18,27 +17,12 @@ for (let i = 0; i < 1_000; i++) {
 ### `join` code
 
 ```js
-str = '';
 arr = [];
 for (let i = 0; i < 1_000; i++) {
 	arr.push(i);
 }
 str = arr.join('');
 ```
-
-### JSBench.Me
-
-#### Generating stroke
-
-![](images/JSBench_Me.png)
-
-https://jsbench.me/wymmwc5lqz/1
-
-#### Using stroke
-
-![](images/JSBench_Me_with_using.png)
-
-https://jsbench.me/vvmmwc6bts/1
 
 ## What to build
 
@@ -769,6 +753,45 @@ str[0]
 [Phase 3: Flatten] ConsString total_length=31
 [Phase 3: Flatten] allocating OneByte SeqString, length=31
 ```
+
+## not balanced ConsString vs SeqString vs balanced ConsString
+
+```js
+LEN = 1_000_000;
+
+function FooPlus() {
+  this.str = '';
+  for (let i = 0; i < LEN; i++) {
+    this.str += 'x';
+  }
+}
+fooPlus = new FooPlus();
+
+function FooJoinSomething() {
+  this.str = new Array(LEN).fill('x').join('');
+}
+fooJoinSomething = new FooJoinSomething();
+
+function FooJoinWholes() {
+  this.str = new Array(LEN).join('x');
+}
+fooJoinWholes = new FooJoinWholes();
+```
+
+![](not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_construct.png)
+
+```
+ConsString. Бинарное несбалансированное дерево
+plus           - 20_000.0 kB
+
+SeqString. Плоская строка
+join something -  1_000.0 kB
+
+ConsString. Бинарного сбалансированное дерево с ссылками на одну строку
+join wholes    -      0.5 kB
+```
+
+![](not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_after_flat.png)
 
 ## tq
 
