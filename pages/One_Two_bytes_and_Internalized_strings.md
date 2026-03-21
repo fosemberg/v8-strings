@@ -2,8 +2,8 @@
 
 ## SeqOneByteString and SeqTwoByteString inside ConsTwoBytString
 
-![](./images/ConsOneTwoByteString.jpg)
+![](ConsOneTwoByteString.jpg)
 
 ## Internalized strings
 
-![](./images/InternalizedString_Code.jpg)
+![](InternalizedString_Code.jpg)

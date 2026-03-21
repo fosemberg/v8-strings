@@ -763,9 +763,11 @@ ConsString(27) "19"
 ## Extra
 
 - array from wholes join optimization
-- [./array_from_wholes_join_optimization](./array_from_wholes_join_optimization.md)
+- [array_from_wholes_join_optimization](array_from_wholes_join_optimization.md)
 - Devtools Memory Snapshots Extra
-  [./One_Two_bytes_and_Internalized_strings](./One_Two_bytes_and_Internalized_strings.md)
+  [One_Two_bytes_and_Internalized_strings](One_Two_bytes_and_Internalized_strings.md)
+- Change `kMinLenght` on 23
+  [Change_kMinLength_on_23](Change_kMinLength_on_23.md)
 
 ## Related links
 
