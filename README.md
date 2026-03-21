@@ -762,12 +762,9 @@ ConsString(27) "19"
 
 ## Extra
 
-- Array from wholes join optimization
-  [Array_from_wholes_join_optimization](./pages/Array_from_wholes_join_optimization.md)
-- Devtools Memory Snapshots Extra
-  [One_Two_bytes_and_Internalized_strings](./pages/One_Two_bytes_and_Internalized_strings.md)
-- Change `kMinLenght` on 23
-  [Change_kMinLength_on_23](./pages/Change_kMinLength_on_23.md)
+- [Change `kMinLenght` on 23 (2 min)](./pages/Change_kMinLength_on_23.md)
+- [Array from wholes join optimization (12 min)](./pages/Array_from_wholes_join_optimization.md)
+- [One Two bytes and Internalized strings (5 min)](./pages/One_Two_bytes_and_Internalized_strings.md)
 
 ## Related links
 
