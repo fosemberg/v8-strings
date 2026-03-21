@@ -763,7 +763,7 @@ ConsString(27) "19"
 ## Extra
 
 - [Change `kMinLenght` on 23 (2 min)](./pages/Change_kMinLength_on_23.md)
-- [Array from wholes join optimization (12 min)](./pages/Array_from_wholes_join_optimization.md)
+- [Wholes join optimization (12 min)](./pages/Wholes_join_optimization.md)
 - [One Two bytes and Internalized strings (5 min)](./pages/One_Two_bytes_and_Internalized_strings.md)
 
 ## Related links
