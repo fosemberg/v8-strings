@@ -24,12 +24,12 @@ str = arr.join('');
 
 #### Generating stroke
 
-![](images/JSBench_Me.png)
+![](JSBench_Me.png)
 
 https://jsbench.me/wymmwc5lqz/1
 
 #### Using stroke
 
-![](images/JSBench_Me_with_using.png)
+![](JSBench_Me_with_using.png)
 
 https://jsbench.me/vvmmwc6bts/1
