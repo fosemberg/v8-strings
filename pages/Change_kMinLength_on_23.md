@@ -11,6 +11,8 @@
 +   static const uint32_t kMinLength = 23;
 ```
 
+Rebuild will affect 1016 targets and will take 10 minutes to complete.
+
 `./out/kMinLength_23/d8 test_js/ConsString.js`
 
 ```
