@@ -47,11 +47,11 @@ git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git --dep
 echo "export PATH=$(pwd)/depot_tools:\$PATH" >> ~/.zshrc
 source ~/.zshrc
 
-fetch --nohistory v8
+fetch --nohistory v8 && osascript -e 'display dialog "Fetching done"'
 
 cd v8
 gn gen out/foo --args='target_cpu="arm64"'
-ninja -C out/foo d8
+ninja -C out/foo d8 && osascript -e 'display dialog "Building done"'
 
 echo "console.log('Hello world!');" > test.js
 ./out/foo/d8 test.js
