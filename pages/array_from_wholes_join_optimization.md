@@ -53,7 +53,7 @@ function FooJoinWholes() {
 fooJoinWholes = new FooJoinWholes();
 ```
 
-![](not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_construct.png)
+![](./images/not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_construct.png)
 
 ```
 1. plus (+=)  —  ConsString. Unbalanced binary tree  —  20_000.0 kB
@@ -107,5 +107,5 @@ Leaves are flat SeqStrings, both halves reference the same leaf.
  (SeqStr 7) (SeqStr 8)   ↑same     ↑same      ↑same     ↑same
 ```
 
-![](not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_after_flat.png)
+![](./images/not_balanced_ConsString_vs_SeqString_vs_balanced_ConsString_after_flat.png)
 
